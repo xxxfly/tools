@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>查询IP地址</title>
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <script src="http://cdn.static.runoob.com/libs/angular.js/1.4.6/angular.min.js"></script>
+</head>
+
+<body>
+    <div class="container" ng-app="mainApp" ng-controller="mainController">
+        <form style="margin-top:40px;width:100%;">
+            <div class="form-group">
+                <div class="col-xs-8">
+                    <input type="text" class="form-control" ng-model="Model.ipText">
+                </div>
+                <button class="btn btn-info " type="button" ng-click="Action.SubmitSearch()">获取IP信息</button>
+            </div>
+        </form>
+        <div style="margin:40px 20px;;padding:10px;" ng-show="Model.IsShow">
+            <p class="row"><label class="col-xs-3">IP:</label>{{Model.result.ip}}</p>
+            <p class="row"><label class="col-xs-3">国家:</label>{{Model.result.country}}</p>
+            <p class="row"><label class="col-xs-3">地区:</label>{{Model.result.area}}</p>
+            <p class="row"><label class="col-xs-3">省份:</label>{{Model.result.region}}</p>
+            <p class="row"><label class="col-xs-3">城市:</label>{{Model.result.city}}</p>
+            <p class="row"><label class="col-xs-3">运营商:</label>{{Model.result.isp}}</p>
+            <p class="row"><label class="col-xs-3">地区ID:</label>{{Model.result.area_id}}</p>
+            <p class="row"><label class="col-xs-3">省份ID:</label>{{Model.result.region_id}}</p>
+            <p class="row"><label class="col-xs-3">城市ID:</label>{{Model.result.city_id}}</p>
+        </div>
+    </div>
+    <script>
+        var app = angular.module('mainApp', []);
+        app.controller('mainController', function($scope, $http) {
+            //定义数据模型
+            var model = {
+                ipText: null,
+                result: {
+                    ip: null,
+                    country: null,
+                    area: null,
+                    region: null,
+                    city: null,
+                    isp: null,
+                    country_id: null,
+                    area_id: null,
+                    region_id: null,
+                    city_id: null,
+                    isp_id: null
+                },
+                IsShow: false
+            }
+            $scope.Model = model;
+            //定义页面操作
+            var action = {
+                SubmitSearch: function() {
+
+                    var host = "https://dm-81.data.aliyun.com/rest/160601/ip/getIpInfo.json";
+                    if (model.ipText == "" || model.ipText == null) {
+                        alert("请输入IP地址")
+                        return;
+                    }
+                    host += "?ip=" + model.ipText;
+                    var appCode = "7021f839431b4ee0bd5817179389b170";
+                    $http({
+                        method: "GET",
+                        url: host,
+                        headers: {
+                            'Authorization': 'APPCODE ' + appCode
+                        }
+                    }).success(function(result) {
+                        if (result.code == "0") {
+                            model.IsShow = true;
+                            var data = result["data"];
+                            model.result.ip = data["ip"];
+                            model.result.country = data["country"];
+                            model.result.area = data["area"];
+                            model.result.region = data["region"];
+                            model.result.city = data["city"];
+                            model.result.isp = data["isp"];
+                            model.result.country_id = data["country_id"];
+                            model.result.area_id = data["area_id"];
+                            model.result.region_id = data["region_id"];
+                            model.result.city_id = data["city_id"];
+                            model.result.isp_id = data["isp_id"];
+                        } else {
+                            alert("查询出错了!")
+                        }
+                    })
+                }
+            }
+            $scope.Action = action;
+        })
+    </script>
+</body>
+
+</html>
