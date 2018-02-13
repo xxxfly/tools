@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>获取中国省市县行政区划</title>
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <script src="http://cdn.static.runoob.com/libs/angular.js/1.4.6/angular.min.js"></script>
+</head>
+
+<body>
+    <div class="container" ng-app="mainApp" ng-controller="mainController">
+        <div class="row" style="margin-top:10%">
+            <div class="col-xs-12">
+                <button class="btn btn-info center-block" type="button" ng-click="Action.SubmitQu()">获取信息</button>
+            </div>
+        </div>
+        <div class="row" style="margin-top:10%">
+            <div class="col-xs-12">
+                <textarea class="form-control" rows="12" ng-show="Model.IsShow" ng-model="Model.answerText"></textarea>
+            </div>
+        </div>
+    </div>
+
+    </div>
+    <script>
+        var app = angular.module('mainApp', []);
+        app.controller('mainController', function($scope, $http) {
+            //定义数据模型
+            var model = {
+                questionText: null,
+                answerText: null,
+                IsShow: true
+            }
+            $scope.Model = model;
+            //定义页面操作
+            var action = {
+                SubmitQu: function() {
+
+                    var host = "http://jisuarea.market.alicloudapi.com/area/all";
+                    var appCode = "7021f839431b4ee0bd5817179389b170";
+                    $http({
+                        method: "GET",
+                        url: host,
+                        headers: {
+                            'Authorization': 'APPCODE ' + appCode
+                        }
+                    }).success(function(result) {
+                        if (result.msg == "ok" && result.status == "0") {
+                            model.IsShow = true;
+                            var resObject = result.result;
+                            model.answerText = JSON.stringify(resObject);
+
+                        } else {
+                            model.answerText = "出错了";
+                        }
+                    })
+                }
+            }
+
+            $scope.Action = action;
+        })
+    </script>
+</body>
+
+</html>
