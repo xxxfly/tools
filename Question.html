@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>问题咨询</title>
+    <link rel="stylesheet" href="CSS\bootstrap.css">
+    <link rel="stylesheet" href="CSS\Default.css">
+    <script src="http://cdn.static.runoob.com/libs/angular.js/1.4.6/angular.min.js"></script>
+</head>
+
+<body>
+    <div class="container" ng-app="mainApp" ng-controller="mainController">
+        <div class="row top_10">
+            <div class="col-md-8 col-md-offset-2 input-group ">
+                <input class="form-control" type="text" ng-model="Model.questionText">
+                <span class="input-group-btn">
+                    <button class="btn btn-info" type="button" ng-click="Action.SubmitQu()" >提问</button>
+                </span>
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+        <div class="row top_10">
+            <div class="col-md-12">
+                <textarea class="form-control" rows="6" ng-show="Model.IsShow" ng-model="Model.answerText"></textarea>
+            </div>
+        </div>
+    </div>
+    <script>
+        var app = angular.module('mainApp', []);
+        app.controller('mainController', function($scope, $http) {
+            //定义数据模型
+            var model = {
+                questionText: null,
+                answerText: null,
+                IsShow: false,
+                answerType: null,
+                answerRelquestion: null
+            }
+            $scope.Model = model;
+            //定义页面操作
+            var action = {
+                SubmitQu: function() {
+                    var question = model.questionText;
+                    //验证问题是否为空
+                    if (question == "" || question == null) {
+                        model.IsShow = true;
+                        model.answerText = "没有问题是最大的问题。";
+                        return;
+                    }
+                    var host = "http://jisuznwd.market.alicloudapi.com";
+                    var path = "/iqa/query";
+                    var appCode = "7021f839431b4ee0bd5817179389b170";
+                    var url = host + path;
+                    $http({
+                        method: "GET",
+                        url: url + "?question=" + question,
+                        headers: {
+                            'Authorization': 'APPCODE ' + appCode
+                        }
+                    }).success(function(result) {
+                        if (result.msg == "ok" && result.status == "0") {
+                            model.IsShow = true;
+                            var resObject = result.result;
+                            model.answerText = resObject["content"];
+                            model.answerType = resObject["type"];
+                            model.answerRelquestion = resObject["relquestion"];
+                        } else {
+                            model.answerText = "我什么都不知道。";
+                        }
+                    })
+                }
+            }
+
+            $scope.Action = action;
+        })
+    </script>
+</body>
+
+</html

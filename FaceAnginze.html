@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>脸部识别</title>
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <script src="http://cdn.static.runoob.com/libs/angular.js/1.4.6/angular.min.js"></script>
+</head>
+
+<body>
+    <div class="container" ng-app="mainApp" ng-controller="mainController">
+        <div class="row" style="margin-top:30px">
+            <div class="col-xs-12">
+                <input type="file" id="one-input" accept="image/*" file-model="images" onchange="angular.element(this).scope().Action.img_upload(this.files)" />
+                <button class="btn btn-info" style="margin-top:20px" type="button" ng-click="Action.anginzeSubmit()">照片识别</button>
+            </div>
+        </div>
+        <div class="row" style="margin-top:30px">
+            <div class="col-xs-12" ng-repeat="item in thumb">
+                <!-- <img id="preview" src="" alt="图片" class="img-response"> -->
+                <label class="col-xs-12">
+                    <img class="img-response" width="100%" ng-src="{{item.imgSrc}}"/>
+                </label>
+            </div>
+        </div>
+        <div class="row" style="margin-top:30px" ng-show="Model.IsShow">
+            <div class="col-xs-12">
+                <p><label>年龄:</label>{{Model.queryResult.age}}</p>
+                <p><label>性别:</label>{{Model.queryResult.sex}}</p>
+                <p><label>表情:</label>{{Model.queryResult.expression}}</p>
+                <p><label>种族:</label>{{Model.queryResult.race}}</p>
+                <p><label>打分:</label>{{Model.queryResult.quality}}</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        var app = angular.module('mainApp', []);
+        app.controller('mainController', function($scope, $http) {
+            //定义数据模型
+            var model = {
+                queryResult: {
+                    age: null,
+                    sex: null,
+                    expression: null,
+                    race: null,
+                    quality: null
+                },
+                IsShow: false
+            }
+
+            $scope.Model = model;
+
+            $scope.reader = new FileReader(); //创建一个FileReader接口
+            $scope.thumb = new Array(); //用于存放图片的base64
+            $scope.thumb_default = { //用于循环默认的‘加号’添加图片的框
+                1111: {}
+            };
+            //定义页面操作
+            var action = {
+                img_upload: function(files) {
+                    $scope.guid = (new Date()).valueOf(); //通过时间戳创建一个随机数，作为键名使用
+                    $scope.reader.readAsDataURL(files[0]); //FileReader的方法，把图片转成base64
+                    $scope.reader.onload = function(ev) {
+                        $scope.$apply(function() {
+                            $scope.thumb = new Array();
+                            $scope.thumb.push({
+                                "guid": $scope.guid,
+                                "imgSrc": ev.target.result //接收base64
+                            });
+
+
+                        });
+                    };
+
+                },
+                anginzeSubmit: function() {
+
+                    if ($scope.thumb.length == 0) {
+                        alert("请上传照片")
+                        return;
+                    }
+                    var itemThumb = $scope.thumb[0];
+                    var host = "http://faceall.market.alicloudapi.com/v2/detection/detect";
+                    var appCode = "7021f839431b4ee0bd5817179389b170";
+                    $http({
+                        method: "POST",
+                        url: host,
+                        headers: {
+                            'Authorization': 'APPCODE ' + appCode
+                        },
+                        data: {
+                            "img_base64": itemThumb.imgSrc, // or "img_base64":your base64
+                            "attributes": "true"
+                        }
+                    }).success(function(result) {
+
+                        model.IsShow = true;
+                        try {
+                            var facesItem = result.faces[0];
+                            var attributes = facesItem.attributes;
+                            var age = attributes.age;
+                            var race = attributes.race[0].kind;
+                            var quality = attributes.quality;
+                            var expression = attributes.expression[0].kind;
+                            var gender = attributes.gender[0].kind;
+                            var beauty = attributes.beauty;
+
+                            model.queryResult.age = age;
+                            model.queryResult.race = race;
+                            model.queryResult.sex = gender;
+                            model.queryResult.expression = expression;
+                            model.queryResult.quality = quality;
+                        } catch (err) {
+                            alert(err) // 错误
+                        }
+
+
+                    })
+
+
+                },
+                imgPreview: function(self) {
+                    if (window.FileReader) {
+                        var reader = new FileReader();
+                    } else {
+                        alert("您的设备不支持图片预览功能，如需该功能请升级您的设备！");
+                    }
+                    //获取文件
+                    var file = self.files[0];
+                    var imageType = /^image\//;
+                    //是否是图片
+                    if (!imageType.test(file.type)) {
+                        alert("请选择图片！");
+                        return;
+                    }
+                    //读取完成
+                    reader.onload = function(e) {
+                        //获取图片dom
+                        var img = document.getElementById("preview");
+                        //图片路径设置为读取的图片
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+            $scope.Action = action;
+
+        })
+    </script>
+</body>
+
+</html>
