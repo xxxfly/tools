@@ -13,12 +13,44 @@
 <body>
     <div class="container" ng-app="mainApp" ng-controller="mainController">
         <div class="row" style="margin-top:30px">
-            <div class="col-xs-12">
+            <div class="col-xs-12 ">
                 <input type="file" id="one-input" accept="image/*" file-model="images" onchange="angular.element(this).scope().Action.img_upload(this.files)" />
-                <button class="btn btn-info" style="margin-top:20px" type="button" ng-click="Action.anginzeSubmit()">照片识别</button>
+                <button class="btn btn-info center-block" style="margin-top:20px" type="button" ng-click="Action.anginzeSubmit()">照片识别</button>
             </div>
         </div>
-        <div class="row" style="margin-top:30px">
+        <div style="margin-top:30px;margin-bottom:30px" ng-show="Model.IsShow">
+            <div class="row" style="margin-top:10px">
+                <div class="col-xs-4 text-right">
+                    年龄:
+                </div>
+                <div class="col-xs-8">{{Model.queryResult.age}}</div>
+            </div>
+            <div class="row" style="margin-top:10px">
+                <div class="col-xs-4 text-right">
+                    性别:
+                </div>
+                <div class="col-xs-8">{{Model.queryResult.sex}}</div>
+            </div>
+            <div class="row" style="margin-top:10px">
+                <div class="col-xs-4 text-right">
+                    表情:
+                </div>
+                <div class="col-xs-8">{{Model.queryResult.expression}}</div>
+            </div>
+            <div class="row" style="margin-top:10px">
+                <div class="col-xs-4 text-right">
+                    种族:
+                </div>
+                <div class="col-xs-8">{{Model.queryResult.race}}</div>
+            </div>
+            <div class="row" style="margin-top:10px">
+                <div class="col-xs-4 text-right">
+                    打分:
+                </div>
+                <div class="col-xs-8">{{Model.queryResult.quality}}</div>
+            </div>
+        </div>
+        <div class="row" style="margin-top:30px;margin-bottom:30px">
             <div class="col-xs-12" ng-repeat="item in thumb">
                 <!-- <img id="preview" src="" alt="图片" class="img-response"> -->
                 <label class="col-xs-12">
@@ -26,29 +58,22 @@
                 </label>
             </div>
         </div>
-        <div class="row" style="margin-top:30px" ng-show="Model.IsShow">
-            <div class="col-xs-12">
-                <p><label>年龄:</label>{{Model.queryResult.age}}</p>
-                <p><label>性别:</label>{{Model.queryResult.sex}}</p>
-                <p><label>表情:</label>{{Model.queryResult.expression}}</p>
-                <p><label>种族:</label>{{Model.queryResult.race}}</p>
-                <p><label>打分:</label>{{Model.queryResult.quality}}</p>
-            </div>
-        </div>
+
+
     </div>
     <script>
         var app = angular.module('mainApp', []);
         app.controller('mainController', function($scope, $http) {
             //定义数据模型
             var model = {
-                queryResult: {
+                queryResult: { //照片分析结果对象
                     age: null,
                     sex: null,
                     expression: null,
                     race: null,
                     quality: null
                 },
-                IsShow: false
+                IsShow: false //是否展示结果，默认不展示
             }
 
             $scope.Model = model;
@@ -76,29 +101,32 @@
                     };
 
                 },
-                anginzeSubmit: function() {
+                anginzeSubmit: function() { //照片识别按钮提交操作
 
                     if ($scope.thumb.length == 0) {
                         alert("请上传照片")
                         return;
                     }
-                    var itemThumb = $scope.thumb[0];
-                    var host = "http://faceall.market.alicloudapi.com/v2/detection/detect";
-                    var appCode = "7021f839431b4ee0bd5817179389b170";
+
+                    var itemThumb = $scope.thumb[0]; //获取上传图片的base64格式内容
+
+                    var host = "http://faceall.market.alicloudapi.com/v2/detection/detect"; //接口域名
+                    var appCode = "7021f839431b4ee0bd5817179389b170"; //阿里云分配的AppCode
                     $http({
                         method: "POST",
                         url: host,
                         headers: {
-                            'Authorization': 'APPCODE ' + appCode
+                            'Authorization': 'APPCODE ' + appCode //鉴权方式
                         },
                         data: {
-                            "img_base64": itemThumb.imgSrc, // or "img_base64":your base64
+                            "img_base64": itemThumb.imgSrc, // or "img_url":your url
                             "attributes": "true"
                         }
-                    }).success(function(result) {
-
-                        model.IsShow = true;
+                    }).success(function(result) { //获取结果
+                        console.info(result);
+                        model.IsShow = true; //展示结果
                         try {
+                            //结果解析
                             var facesItem = result.faces[0];
                             var attributes = facesItem.attributes;
                             var age = attributes.age;
@@ -109,12 +137,12 @@
                             var beauty = attributes.beauty;
 
                             model.queryResult.age = age;
-                            model.queryResult.race = race;
-                            model.queryResult.sex = gender;
-                            model.queryResult.expression = expression;
+                            model.queryResult.race = getRaceZN(race);
+                            model.queryResult.sex = getSexZN(gender);
+                            model.queryResult.expression = getExpressionZN(expression);
                             model.queryResult.quality = quality;
                         } catch (err) {
-                            alert(err) // 错误
+                            alert(err); // 弹出错误
                         }
 
 
@@ -122,7 +150,7 @@
 
 
                 },
-                imgPreview: function(self) {
+                imgPreview: function(self) { //图片预览，没有用
                     if (window.FileReader) {
                         var reader = new FileReader();
                     } else {
@@ -147,8 +175,50 @@
                 }
             }
             $scope.Action = action;
-
         })
+
+        //获取性别中文
+        function getSexZN(sexEN) {
+            if (sexEN.toLocaleLowerCase() == "male") {
+                return "男性";
+            }
+            if (sexEN.toLocaleLowerCase() == "female") {
+                return "女性";
+            }
+            return "未知";
+        }
+        //获取表情中文
+        function getExpressionZN(expressionEN) {
+            if (expressionEN.toLocaleLowerCase().indexOf("happy") > -1) {
+                return "开心";
+            }
+            if (expressionEN.toLocaleLowerCase().indexOf("angry") > -1) {
+                return "愤怒";
+            }
+            if (expressionEN.toLocaleLowerCase().indexOf("neutral") > -1) {
+                return "自然";
+            }
+            if (expressionEN.toLocaleLowerCase().indexOf("fear") > -1) {
+                return "恐惧";
+            }
+            if (expressionEN.toLocaleLowerCase().indexOf("sad") > -1) {
+                return "悲伤";
+            }
+            return "未知";
+        }
+        //获取种族中文
+        function getRaceZN(raceEN) {
+            if (raceEN.toLocaleLowerCase().indexOf("black") > -1) {
+                return "黑人";
+            }
+            if (raceEN.toLocaleLowerCase().indexOf("white") > -1) {
+                return "白人";
+            }
+            if (raceEN.toLocaleLowerCase().indexOf("yellow") > -1) {
+                return "黄种人";
+            }
+            return "未知";
+        }
     </script>
 </body>
 
