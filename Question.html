@@ -12,7 +12,7 @@
 
 <body>
     <div class="container" ng-app="mainApp" ng-controller="mainController">
-        <div class="row top_10">
+        <div class="top_10">
             <div class="col-md-8 col-md-offset-2 input-group ">
                 <input class="form-control" type="text" ng-model="Model.questionText">
                 <span class="input-group-btn">
@@ -23,7 +23,7 @@
         </div>
         <div class="row top_10">
             <div class="col-md-12">
-                <textarea class="form-control" rows="6" ng-show="Model.IsShow" ng-model="Model.answerText"></textarea>
+                <textarea class="form-control" rows="12" ng-show="Model.IsShow" ng-model="Model.answerText"></textarea>
             </div>
         </div>
     </div>
@@ -49,13 +49,11 @@
                         model.answerText = "没有问题是最大的问题。";
                         return;
                     }
-                    var host = "http://jisuznwd.market.alicloudapi.com";
-                    var path = "/iqa/query";
+                    var host = "http://jisuznwd.market.alicloudapi.com/iqa/query";
                     var appCode = "7021f839431b4ee0bd5817179389b170";
-                    var url = host + path;
                     $http({
                         method: "GET",
-                        url: url + "?question=" + question,
+                        url: host + "?question=" + question,
                         headers: {
                             'Authorization': 'APPCODE ' + appCode
                         }

@@ -19,36 +19,31 @@
             </div>
         </div>
         <div style="margin-top:30px;margin-bottom:30px" ng-show="Model.IsShow">
-            <div class="row" style="margin-top:10px">
-                <div class="col-xs-4 text-right">
+            <p class="row" style="margin-top:10px">
+                <label class="col-xs-3 text-right">
                     年龄:
-                </div>
-                <div class="col-xs-8">{{Model.queryResult.age}}</div>
-            </div>
-            <div class="row" style="margin-top:10px">
-                <div class="col-xs-4 text-right">
+                </label> {{Model.queryResult.age}}
+            </p>
+            <p class="row" style="margin-top:10px">
+                <label class="col-xs-3 text-right">
                     性别:
-                </div>
-                <div class="col-xs-8">{{Model.queryResult.sex}}</div>
-            </div>
-            <div class="row" style="margin-top:10px">
-                <div class="col-xs-4 text-right">
+                </label> {{Model.queryResult.sex}}
+            </p>
+            <p class="row" style="margin-top:10px">
+                <label class="col-xs-3 text-right">
                     表情:
-                </div>
-                <div class="col-xs-8">{{Model.queryResult.expression}}</div>
-            </div>
-            <div class="row" style="margin-top:10px">
-                <div class="col-xs-4 text-right">
+                </label> {{Model.queryResult.expression}}
+            </p>
+            <p class="row" style="margin-top:10px">
+                <label class="col-xs-3 text-right">
                     种族:
-                </div>
-                <div class="col-xs-8">{{Model.queryResult.race}}</div>
-            </div>
-            <div class="row" style="margin-top:10px">
-                <div class="col-xs-4 text-right">
+                </label> {{Model.queryResult.race}}
+            </p>
+            <p class="row" style="margin-top:10px">
+                <label class="col-xs-3 text-right">
                     打分:
-                </div>
-                <div class="col-xs-8">{{Model.queryResult.quality}}</div>
-            </div>
+                </label> {{Model.queryResult.quality}}
+            </p>
         </div>
         <div class="row" style="margin-top:30px;margin-bottom:30px">
             <div class="col-xs-12" ng-repeat="item in thumb">
